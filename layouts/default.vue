@@ -29,27 +29,38 @@ export default class Default extends Vue {
   @wallet.State
   public supportedChainIds!: number[]
 
+  @wallet.State
+  public connectedAddress!: string
+
   @wallet.Mutation
   public setConnected!: (isConnected: boolean) => void
 
+  @wallet.Mutation
+  public setConnectedAddress!: (address: string) => void
+
   mounted() {
-    window.ethereum.on('accountsChanged', (account: string) => {
+    window.ethereum.on('accountsChanged', (account: string[]) => {
       if (account) {
-        // this.connectedAddress = account
+        this.setConnectedAddress(account[0])
+        this.$nuxt.$emit('fetchBalance')
+      } else {
+        this.setConnectedAddress('')
+        this.setConnected(false)
       }
     })
 
     window.ethereum.on('chainChanged', async (chainId: string) => {
       if (this.supportedChainIds.includes(parseInt(chainId, 16))) {
         try {
-          const signer = await provider.getSigner()
-          await signer.getAddress()
+          const signer = this.connectedAddress
+            ? await provider.getSigner(this.connectedAddress)
+            : await provider.getSigner()
+          this.setConnectedAddress(await signer.getAddress())
           this.setConnected(true)
-          this.$nuxt.$emit('chainSupported', true)
         } catch (e) {
-          console.error('layout', e)
           this.setConnected(false)
         }
+        this.$nuxt.$emit('chainSupported', true)
       } else {
         this.$nuxt.$emit('chainSupported', false)
         this.setConnected(false)

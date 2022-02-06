@@ -1,11 +1,21 @@
 <template>
   <div>
-    <Wallet
-      v-if="supportedChain"
-      class="mt-12"
+    <YourWallet
+      v-if="supportedChain === true"
+      class="mt-6"
       :supported-tokens="supportedTokens"
     />
-    <v-card v-else class="rounded-xl mt-12" elevation="12" outlined>
+    <YourStake
+      v-if="supportedChain"
+      class="mt-10"
+      :supported-tokens="supportedTokens"
+    />
+    <v-card
+      v-else-if="supportedChain === false"
+      class="rounded-xl mt-12"
+      elevation="12"
+      outlined
+    >
       <v-card-title>
         <span class="headline">Your Wallet</span>
       </v-card-title>
@@ -15,6 +25,14 @@
         </v-alert>
       </v-card-text>
     </v-card>
+    <div v-else class="text-center mt-12">
+      <h1 class="white--text">Welcome to Token Farm Dapp</h1>
+      <v-progress-circular
+        :size="100"
+        color="green"
+        indeterminate
+      ></v-progress-circular>
+    </div>
   </div>
 </template>
 
@@ -24,14 +42,16 @@ import { constants } from 'ethers'
 import { provider } from '~/plugins/provider'
 import networkMapping from '~/chain-info/deployments/map.json'
 import brownieConfig from '~/brownie-config.json'
-import Wallet from '~/components/Wallet/YourWallet.vue'
+import YourWallet from '~/components/Wallet/YourWallet.vue'
+import YourStake from '~/components/Contract/YourStake.vue'
 import { Token, networkMap } from '~/interfaces/token'
 
 const wallet = namespace('wallet')
 
 @Component({
   components: {
-    Wallet,
+    YourWallet,
+    YourStake,
   },
 })
 export default class Home extends Vue {
@@ -40,10 +60,17 @@ export default class Home extends Vue {
   fauTokenAddress: string = constants.AddressZero
 
   supportedTokens: Array<Token> = []
-  supportedChain: boolean = false
+  supportedChain: boolean | null = null
   warningText: string = ''
+
   @wallet.State
   public supportedChainIds!: number[]
+
+  head() {
+    return {
+      title: 'Home',
+    }
+  }
 
   async setupDapp() {
     try {

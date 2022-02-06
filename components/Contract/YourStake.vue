@@ -1,7 +1,7 @@
 <template>
   <v-card class="rounded-xl" elevation="12" outlined>
     <v-card-title>
-      <span class="headline">Your Wallet</span>
+      <span class="headline">Your Stake</span>
     </v-card-title>
     <v-tabs v-model="tab" background-color="primary">
       <v-tab v-for="item in supportedTokens" :key="item.name">
@@ -13,8 +13,8 @@
       <v-tab-item v-for="item in supportedTokens" :key="item.name">
         <v-card flat>
           <v-card-text v-if="isConnected">
-            <div class="text-center"><WalletBalance :token="item" /></div>
-            <StakeForm :token="item" />
+            <div class="text-center"><StakeBalance :token="item" /></div>
+            <UnstakeForm :token="item" />
           </v-card-text>
           <v-card-text v-else class="text-center">
             <v-alert dense outlined type="error">
@@ -29,19 +29,19 @@
 
 <script lang="ts">
 import { Vue, Component, Prop, namespace } from 'nuxt-property-decorator'
-import WalletBalance from '@/components/Wallet/WalletBalance.vue'
-import StakeForm from '@/components/Wallet/StakeForm.vue'
+import StakeBalance from '@/components/Contract/StakeBalance.vue'
+import UnstakeForm from '@/components/Contract/UnstakeForm.vue'
 import { Token } from '~/interfaces/token'
 
 const wallet = namespace('wallet')
 
 @Component({
   components: {
-    WalletBalance,
-    StakeForm,
+    StakeBalance,
+    UnstakeForm,
   },
 })
-export default class YourWallet extends Vue {
+export default class YourStake extends Vue {
   @Prop({ required: true }) supportedTokens!: Array<Token>
   tab = null
   @wallet.State

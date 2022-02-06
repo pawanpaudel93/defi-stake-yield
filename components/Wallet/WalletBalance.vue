@@ -27,6 +27,9 @@ export default class WalletBalance extends Vue {
   @wallet.State
   public isConnected!: boolean
 
+  @wallet.Mutation
+  public setConnected!: (isConnected: boolean) => void
+
   async setTokenBalance() {
     try {
       const contract = new ethers.Contract(
@@ -38,8 +41,10 @@ export default class WalletBalance extends Vue {
       const address = await provider.getSigner().getAddress()
       const balance = (await contract.balanceOf(address)).toString()
       this.tokenBalance = parseFloat(ethers.utils.formatEther(balance))
-    } catch (e) {
-      console.error('layout', e)
+    } catch (e: any) {
+      if (e.operation === 'getAddress') {
+        this.setConnected(false)
+      }
     }
   }
 

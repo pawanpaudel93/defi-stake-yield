@@ -16,6 +16,7 @@
       <v-btn v-if="!isConnected" color="primary" @click="connect"
         >Connect</v-btn
       >
+      <v-btn v-if="isConnected" class="mr-2">{{ address }}</v-btn>
       <v-btn v-if="isConnected" color="warning" @click="disconnect"
         >Disconnect</v-btn
       >
@@ -38,15 +39,23 @@ export default class Header extends Vue {
   @wallet.State
   public supportedChainIds!: number[]
 
+  @wallet.State
+  public connectedAddress!: string
+
   @wallet.Mutation
   public setConnected!: (isConnected: boolean) => void
 
+  @wallet.Mutation
+  public setConnectedAddress!: (address: string) => void
+
   async mounted() {
     try {
-      const signer = await provider.getSigner()
+      const signer = this.connectedAddress
+        ? await provider.getSigner(this.connectedAddress)
+        : await provider.getSigner()
       const { chainId } = await provider.getNetwork()
       if (chainId && signer && this.supportedChainIds.includes(chainId)) {
-        await signer.getAddress()
+        this.setConnectedAddress(await signer.getAddress())
         this.setConnected(true)
       } else {
         this.$nuxt.$emit('chainSupported', false)
@@ -61,12 +70,23 @@ export default class Header extends Vue {
     try {
       await provider.send('eth_requestAccounts', [])
       const signer = provider.getSigner()
-      await signer.getAddress()
+      this.setConnectedAddress(await signer.getAddress())
       this.setConnected(true)
       this.$nuxt.$emit('fetchBalance')
     } catch (e) {
       console.error('Header', e)
     }
+  }
+
+  get address(): string {
+    if (this.connectedAddress) {
+      const address =
+        this.connectedAddress.slice(0, 4) +
+        '...' +
+        this.connectedAddress.slice(-3)
+      return address
+    }
+    return ''
   }
 
   disconnect(): void {

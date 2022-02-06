@@ -3,8 +3,8 @@ import colors from 'vuetify/es5/util/colors'
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - defi-stake-yield',
-    title: 'defi-stake-yield',
+    titleTemplate: '%s - Defi Stake Yield',
+    title: 'Defi Stake Yield',
     htmlAttrs: {
       lang: 'en'
     },
