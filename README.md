@@ -1,5 +1,7 @@
 # defi-stake-yield
 
+<img src="assets/images/defi-stake-yield.png" alt="defi-stake-yield" />
+
 ## Build Setup
 
 ```bash
